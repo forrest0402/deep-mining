@@ -48,9 +48,9 @@ DeepMining 的工作流模拟了人类专家进行深度业务调研的过程，
 
 ### Phase I: Hypothesis Generation (The Planner) 🕵️
 * **角色**: 规划师
-* **任务**: 基于场景名（如“生鲜坏果退款”），利用大模型的世界知识进行 **MECE 分解**。
-* **产出**: **Intent-Hypothesis Tree**（包含潜在的用户意图、约束条件、边缘Case）。
-* **核心能力**: 模拟用户画像 (Persona Simulation)、构建调研问题 (RQ Formulation)。
+* **任务**: 基于场景名（如“生鲜坏果退款”），通过分析历史对话日志提取用户意图 (User Intents)，并从规范文档中提取相关的约束条件 (Constraints)。
+* **产出**: **Research Questions (RQs)** - 将单一用户意图和若干有效约束条件进行交叉组合，并通过大模型校验其业务合理性，形成一系列针对性的调研问题。
+* **核心能力**: 意图抽取 (Intent Extraction)、约束绑定 (Constraint Binding)、组合校验 (RQ Validation)。
 
 ### Phase II: Evidence Acquisition (The Researcher) 🔍
 * **角色**: 调研员
@@ -95,11 +95,16 @@ miner = DeepMiner(
     logs_path="./data/dialogues"    # 历史日志路径
 )
 
-# 1. 生成假设树 (Planner)
-hypothesis_tree = miner.generate_hypothesis()
+# 1. 生成研判问题 (Planner)
+# Planner 从日志中提取意图，从文档中提取约束，组合生成 Research Questions
+research_questions = miner.decompose_scenario(
+    miner.scenario, 
+    dialogues=miner.logs_data, 
+    docs=miner.docs_data
+)
 
 # 2. 执行深度调研 (Researcher)
-evidence_bank = miner.research(hypothesis_tree)
+evidence_bank = miner.research(research_questions)
 
 # 3. 合成知识图谱 (Analyst)
 sop_graph, skills = miner.synthesize(evidence_bank)

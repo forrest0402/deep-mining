@@ -12,11 +12,11 @@ from typing import Any, Tuple, List
 class DeepMiner:
     """
     The main orchestrator for the DeepMining framework.
-    
+
     This class manages the entire pipeline of hypothesis generation, evidence acquisition,
     knowledge synthesis, and result export. It coordinates the interactions between
     the Planner, Researcher, and Analyst agents.
-    
+
     Attributes:
         scenario (str): The name of the business scenario being analyzed.
         docs_path (str): Path to the directory containing normative documents (policies, wikis).
@@ -38,29 +38,28 @@ class DeepMiner:
         # TODO: Initialize Planner, Researcher, Analyst agents here
         pass
 
-    def generate_hypothesis(self) -> Any:
+    def decompose_scenario(self, scenario: str, dialogues: List[Any], docs: List[Any]) -> List[Any]:
         """
-        Phase I: Generate a hypothesis tree for the scenario using the Planner agent.
+        Phase I: Generate Research Questions for the scenario using the Planner agent.
 
-        This method leverages the Planner to decompose the scenario into a structured
-        Intent-Hypothesis Tree using MECE principles and world knowledge.
+        This method leverages the Planner to extract user intents from dialogues,
+        extract constraints from docs, and combine them into validated Research Questions.
 
         Returns:
-            IntentHypothesisTree: A structured tree representation of potential user intents
-            and business logic hypotheses.
+            List[ResearchQuestion]: A list of targeted questions to guide Phase II.
         """
-        # TODO: Invoke Planner.generate_hypothesis(self.scenario)
-        pass
+        # TODO: Invoke PlannerAgent.decompose_scenario(scenario, dialogues, docs)
+        return []
 
-    def research(self, hypothesis_tree: Any) -> Any:
+    def research(self, research_questions: List[Any]) -> Any:
         """
         Phase II: Conduct deep research to validate hypotheses using the Researcher agent.
 
-        The Researcher agent takes the hypothesis tree, formulates research questions,
+        The Researcher agent takes the formulated research questions
         and retrieves evidence from both normative documents and empirical logs.
 
         Args:
-            hypothesis_tree (IntentHypothesisTree): The hypothesis tree generated in Phase I.
+            research_questions (List[ResearchQuestion]): The questions generated in Phase I.
 
         Returns:
             EvidenceBank: A collection of verified evidence and findings linked to
