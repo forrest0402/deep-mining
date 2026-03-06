@@ -62,11 +62,14 @@ DeepMining 的工作流模拟了人类专家进行深度业务调研的过程，
 
 ### Phase III: Knowledge Synthesis (The Analyst) 📊
 * **角色**: 分析师
-* **任务**: 将碎片化证据拼装成完整的知识库。
+* **任务**: 将海量的 `ResearchResult`（包含冲突、约束和证据）合成为全局的知识与 SOP。
+* **流程 (3-Stage Pipeline)**: 
+    1.  **SOP Builder**: 提取约束节点，构建包含条件判断的 Mermaid SOP 有向图。
+    2.  **Skill Identifier**: 基于 SOP 节点缺失的能力，识别需要大模型生成的“原子技能”。
+    3.  **Deep Skill Writer**: 并发生成结构化、携带提示词与工具定义的 `SKILL.md` 指南。
 * **产出**:
     1.  **Core SOP**: 全局流程骨架（Mermaid Flowchart）。
-    2.  **Atomic Skills**: 挂载在节点上的原子能力（Prompt + Knowledge + Tools）。
-* **闭环**: 如果发现逻辑断层，自动触发 Feedback Loop 回到 Phase I 补充调研。
+    2.  **Atomic Skills**: 标准化的 Claude 格式技能包。
 
 ---
 
@@ -78,10 +81,24 @@ pip install -r requirements.txt
 # 推荐使用 python 3.10+
 ```
 
-### 配置 API
-DeepMining 基于 Qwen-Agent 框架构建，支持兼容 OpenAI 格式的模型。
-```bash
-export DASHSCOPE_API_KEY="sk-..."
+### 全局配置 (Global Configuration)
+DeepMining 使用项目根目录下的 `config.yaml` 文件对应用语言、LLM 平台、并发策略和本地缓存策略进行统一收口管理。首次运行时：
+
+1. 确认根目录存在 `config.yaml` (也可通过环境变量重载核心配置).
+2. 在该文件中配置您的通义千问 (Qwen) 或 WanQing 接口对应的 `api_key`。
+
+```yaml
+app:
+  language: "zh_CN"
+  debug: false
+llm:
+  service: "qwen"
+  qwen_model: "qwen3-max"
+  api_key: "sk-..."
+rag:
+  page_index_cache_dir: ".pageindex_cache"
+concurrency:
+  researcher_investigate_workers: 8
 ```
 
 ### 运行挖掘任务
@@ -153,10 +170,11 @@ deep-mining/
 
 ## 🗺️ Roadmap (Q1 规划)
 
-- [x] **V2 核心架构重构**: 完成 Planner/Researcher/Analyst 三阶段跑通。
+- [x] **V2 核心架构重构**: 完成 Planner/Researcher 三阶段跑通。
+- [x] **Data Data Pipeline 迭代**: 构建 Analyst 结构化 Pipeline 输出。
+- [x] **统一状态配置管理**: 抽离环境变量，建立基于 YAML 的集中式管理器。
 - [ ] **数据飞轮 (Data Flywheel)**: 实现从 Badcase 到知识库的自动溯源与热更新。
-- [ ] **可视化工作台**: 基于 Mermaid 的交互式图谱编辑工具。
-- [ ] **增量挖掘**: 支持针对特定分支（Sub-branch）的增量更新，而非全量重跑。
+- [ ] **增量挖掘**: 支持针对特定分支的增量增补更新。
 
 ---
 
