@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@Date : 2025-08-25
+@Date : 2026-08-25
 @Author : xiezizhe
 """
 
@@ -23,8 +23,8 @@ def setup_logger(log_file="grpc.log", level=None):
     Returns:
         logging.Logger: The configured logger instance.
     """
-    # 1. 获取 Logger 实例（建议使用模块名或固定名称）
-    _logger = logging.getLogger('deep_mining_agent_logger')
+    # 1. 获取 Logger 实例 (Configure base package logger)
+    _logger = logging.getLogger('csc_ai_deep_mining')
 
     # 防止重复添加 Handler（如果 logger 已经配置过，直接返回）
     if _logger.handlers:

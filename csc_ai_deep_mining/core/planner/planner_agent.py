@@ -11,6 +11,8 @@ from csc_ai_deep_mining.schema.document import Document
 from csc_ai_deep_mining.schema.research_question import ResearchQuestion
 from csc_ai_agent.llm.schema import Message
 from csc_ai_deep_mining.log import logger
+from csc_ai_deep_mining.config import config
+from csc_ai_deep_mining.utils.llm import extract_json_from_llm
 
 class PlannerAgent:
     """
@@ -20,9 +22,11 @@ class PlannerAgent:
     """
     def __init__(self, llm_service: Any):
         self.llm_service = llm_service
-        self.intent_prompt_path = os.path.join(os.path.dirname(__file__), '../../prompts/planner_intent_extraction_zh_CN.md')
-        self.constraint_prompt_path = os.path.join(os.path.dirname(__file__), '../../prompts/planner_constraint_extraction_zh_CN.md')
-        self.validator_prompt_path = os.path.join(os.path.dirname(__file__), '../../prompts/planner_rq_validator_zh_CN.md')
+        language = config.language
+        suffix = "_zh_CN" if language == "zh_CN" else ""
+        self.intent_prompt_path = os.path.join(os.path.dirname(__file__), f'../../prompts/planner_intent_extraction{suffix}.md')
+        self.constraint_prompt_path = os.path.join(os.path.dirname(__file__), f'../../prompts/planner_constraint_extraction{suffix}.md')
+        self.validator_prompt_path = os.path.join(os.path.dirname(__file__), f'../../prompts/planner_rq_validator{suffix}.md')
         
         # Caches for intent and constraint generation per scenario
         self._intent_cache: Dict[str, List[str]] = {}
@@ -202,28 +206,18 @@ class PlannerAgent:
         response_text = response_msgs[0].content
         
         # Try to parse JSON from the response
-        try:
-            # Clean up markdown formatting if the LLM wrapped it in ```json ... ```
-            if "```json" in response_text:
-                json_str = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                json_str = response_text.split("```")[1].split("```")[0].strip()
-            else:
-                json_str = response_text.strip()
-                
-            parsed_rqa = json.loads(json_str)
-            
-            research_questions = []
-            for item in parsed_rqa:
-                rq = ResearchQuestion(
-                    user_intent=item.get("user_intent", "Unknown Intent"),
-                    constraints=item.get("constraints", []),
-                    question_text=item.get("question_text", "No question text provided")
-                )
-                research_questions.append(rq)
-                
-            return research_questions
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse validator LLM output as JSON: {e}")
+        parsed_rqa = extract_json_from_llm(response_text)
+        if not parsed_rqa:
+            logger.error(f"Failed to parse validator LLM output as JSON: {response_text}")
             return []
+            
+        research_questions = []
+        for item in parsed_rqa:
+            rq = ResearchQuestion(
+                user_intent=item.get("user_intent", "Unknown Intent"),
+                constraints=item.get("constraints", []),
+                question_text=item.get("question_text", "No question text provided")
+            )
+            research_questions.append(rq)
+            
+        return research_questions
