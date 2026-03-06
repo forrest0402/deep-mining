@@ -1,4 +1,5 @@
 ks-csc-ai-models
+kuaishou-csc-ai-agent
 json5~=0.12.1
 pandas~=2.0.3
 infra-framework
@@ -12,10 +13,14 @@ requests~=2.32.4
 tiktoken~=0.7.0
 jsonschema~=4.25.0
 dashscope~=1.24.1
-langchain-core~=0.2.43
 pytest~=8.3.5
 dataclasses~=0.6
 json_repair~=0.30.0
 numpy~=1.24.4
 openpyxl~=3.1.5
 mammoth~=1.11.0
+langgraph~=1.0.10
+langchain-core~=1.2.17
+json_repair~=0.30.3
+tqdm~=4.67.3
+typing_extensions~=4.15.0
